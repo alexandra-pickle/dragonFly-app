@@ -1,0 +1,18 @@
+<h3>List of events</h3>
+<div class="container">
+    <div *ngFor="let event of events" clas="row">
+        <div class="card flex-md-row mb4 shadow-sm h-md-250">
+            <h4>{{event.name}}</h4>
+            <p>
+                <br> {{event.location.name}}
+                <br> {{event.description}}
+            </p>
+            <div class="card-body d-flex flex-column align-items-start">
+                <img class="card-img-right flex-auto" *ngIf="event" [src]="getImage(event.id, event?.images[0]?.id)" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="test">
+</div>
