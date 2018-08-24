@@ -33,6 +33,7 @@ export class EventsComponent implements OnInit {
         if (!eventID || mediaID) {
             return;
         }
+        console(eventID);
         this.eventsService.getEventImage(eventID, mediaID)
         .subscribe((imageResponse: string) => {
             this.test = imageResponse;
