@@ -6,7 +6,9 @@ export interface Event {
     description: string,
     images: Array<EventImage>,
     coments: Array<EventComment>,
-    isGoing?: boolean
+    isGoing?: boolean,
+    isDisplayComments?: boolean,
+    isDisplayingImage?: boolean
 }
 
 export interface EventImage {
