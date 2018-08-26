@@ -7,9 +7,10 @@ export interface Event {
     images: Array<EventImage>,
     coments: Array<EventComment>,
     isGoing?: boolean,
+    isStatusUpdateError?: boolean,
     isDisplayComments?: boolean,
-    isImageLoading?: boolean,
-    imageSrc?: any
+    imageSrc?: any,
+    isNoImageAvailable?: boolean;
 }
 
 export interface EventImage {

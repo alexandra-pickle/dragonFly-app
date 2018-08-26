@@ -19,16 +19,6 @@
     padding-top: 50px;
 }
 
-.eventCheckbox {
-    margin-top: 8px;
-    margin-left: 30px;
-
-    input {
-        width: 20px; 
-        height: 20px;
-    }
-}
-
 .card {
     margin-top: 20px;
 }
@@ -45,4 +35,58 @@
 
 button {
     margin-top: 20px;
+}
+
+.thumbnail {
+    width: 250px;
+    height: auto;
+    margin-top: 10px;
+}
+
+.flex-item-1 {
+    width: 10%;
+    order: 1;
+    padding: 20px;
+
+    input {
+        margin-left: 20px;
+        width: 30px; 
+        height: 30px;
+    }
+}
+
+.flex-item-2 {
+    flex: 1;
+    order: 2;
+}
+
+.flex-item-3 {
+    width: 25%; 
+    order: 3;
+
+    img {
+        padding: 20px;
+        width: 100%;
+        height: auto;
+    }
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: row;
+}
+
+@media (max-width: 750px) {
+    .flex-container {
+      flex-direction: column;
+      flex-wrap: wrap;
+    }
+    
+    .flex-item-3 {
+        width: 100%;
+    }
+
+    .flex-item-1 input {
+        margin-left: 5px;
+    }
 }

@@ -30,7 +30,9 @@ export class EventsService {
     }
 
     /**
-     * Method returns an event image
+     * Method returns event's image
+     * @param eventID - event ID
+     * @param mediaID - image ID
      */
     public getEventImage(eventID: string, mediaID: string) {
         let headers = new HttpHeaders();
@@ -45,7 +47,8 @@ export class EventsService {
     }
 
     /**
-     * Method returns event status
+     * Method returns event's status
+     * @param eventID - event ID
      */
     public getEventStatus(eventID: string){
         return this.http.get
@@ -57,14 +60,15 @@ export class EventsService {
     }
 
     /**
-     * Method updates event status
+     * Method updates status for a particular event
+     * @param eventID - event ID
+     * @param status - event's status
      */
-    public updateEventStatus(eventID: number, status: boolean) {
+    public updateEventStatus(eventID: string, status: boolean) {
         let parameters = {
             coming: status     
         };
 
-        //{apiRoot}/events/{eventId}/status/{userName}
         return this.http.put
         (`${this.configUrl}events/${eventID}/status/${this.userName}`, parameters, { headers: this.headers })
         .pipe(

@@ -1,20 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { EventsService } from './events.service';
 import { Event } from './events.models';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-events',
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.scss']
 })
-export class EventsComponent implements OnInit {
+export class EventsComponent implements OnInit, OnDestroy {
     public isLoading = false;
     public events: Array<Event>;
     public imageSrc: string;
     public test: SafeUrl;
     public startIndex: number;
     public endIndex: number;
+    private subscriptions = new Array<Subscription>();
 
     constructor(private eventsService: EventsService, private sanitizer: DomSanitizer) { }
 
@@ -26,7 +28,7 @@ export class EventsComponent implements OnInit {
         this.events = new Array<Event>();
 
         //  get all the events
-        this.eventsService.getEventsList()
+        this.subscriptions.push(this.eventsService.getEventsList()
             .subscribe((response: Array<Event>) => {
                 if (response) {
                     this.events = response;
@@ -45,7 +47,8 @@ export class EventsComponent implements OnInit {
                                     } 
                                 });
 
-                                this.getThumbnailImage(event);
+                                //  get event's thumbnail image
+                                this.getThumbnailImage(event, eventIndex);
                             }
                         });
                     }
@@ -55,32 +58,70 @@ export class EventsComponent implements OnInit {
             error => {
                 console.log(error);
                 this.isLoading = false;
-            });
+            }));
     }
 
-    public getThumbnailImage(event: Event) {
-        let eventIndex = this.events.indexOf(event);
 
-        if (!eventIndex || (eventIndex < this.startIndex) || (eventIndex > this.endIndex)) {
-            return;
-        }
-        console.log(eventIndex);
+    /**
+     * Method returns event's first image
+     * @param event - event
+     * @param eventIndex - event's index
+     */
+    public getThumbnailImage(event: Event, eventIndex: number) {
+        if (event.images && event.images.length > 0 && 
+            eventIndex < this.endIndex) {
+            
+            let eventFound = this.events.find(x => x.id === event.id);
 
-        if (event && event.images && event.images.length > 0 && this.events.indexOf(event) < 10) {
-            this.eventsService.getEventImage(event.id, event.images[0].id)
-                .subscribe(imageUrl => {
-                    let eventFound = this.events.find(x => x.id === event.id);
-                    eventFound.imageSrc = this.sanitizer.bypassSecurityTrustUrl(imageUrl);
-                });
+            this.subscriptions.push
+                (this.eventsService.getEventImage(event.id, event.images[0].id)
+                    .subscribe(imageUrl => {
+                        if (imageUrl) {
+                            eventFound.imageSrc = this.sanitizer.bypassSecurityTrustUrl(imageUrl);
+                        }      
+                    },
+                    error => {
+                        //  if getting image resulted in an error display no image available
+                        eventFound.imageSrc = './assets/images/no-image-available.png';
+                        eventFound.isNoImageAvailable = true;
+                    }));
+        } else if (event.images.length === 0) {
+            event.imageSrc = './assets/images/no-image-available.png';
+            event.isNoImageAvailable = true;
         }
     }
 
+
+    public ngOnDestroy() {
+        //  destroy all subscriptions
+        this.subscriptions.forEach(subscription => { subscription.unsubscribe()});
+    }
+
+
+    /**
+     * Method updates indexes to for events loading
+     * and loads events' images
+     */
     public loadMoreEvents() {
         this.endIndex += 10;
+            for (let i= this.startIndex+10; i <= this.endIndex; i++) {
+                this.getThumbnailImage(this.events[i], i);
+            }
     }
 
-    public changeEventStatus(eventID: number, isGoing: boolean) {
-        this.eventsService.updateEventStatus(eventID, isGoing).subscribe(response => {
-        });
+    /**
+     * Method updates status for a particular event
+     * @param eventID - event ID
+     * @param isGoing - event status
+     */
+    public changeEventStatus(eventID: string, isGoing: boolean) {
+        this.subscriptions.push
+        (this.eventsService.updateEventStatus(eventID, isGoing)
+            .subscribe(response => {
+                this.events.find(x => x.id === eventID).isStatusUpdateError = false;
+            },
+            error => {
+                this.events.find(x => x.id === eventID).isStatusUpdateError = true;
+            }));
     }
 }

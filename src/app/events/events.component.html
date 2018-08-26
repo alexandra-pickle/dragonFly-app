@@ -1,17 +1,20 @@
 <div class="loader" *ngIf="isLoading"></div>
 
+<!--    EVENT LIST  -->
 <div class="container listContainer" *ngIf="!isLoading">
-    <div *ngFor="let event of events | slice: startIndex : endIndex; let i=index" clas="row">
-        <div class="card d-flex flex-row justify-content-start my-flex-container">
-            <div class="form-check eventCheckbox p-2" *ngIf="event.isGoing !== undefined">
+    <div *ngFor="let event of events | slice: startIndex : endIndex; let i= index">
+        <div class="card d-flex justify-content-start flex-container wrap">
+            <div class="flex-item-1" *ngIf="event.isGoing !== undefined">
                 <input  class="form-check-input"
                         type="checkbox"  
                         [(ngModel)]="event.isGoing"
                         (change)="changeEventStatus(event.id, event.isGoing)">
+                <span class="danger" *ngIf="event.isStatusUpdateError">
+                    Failed to update status
+                </span>
             </div>
-            <div class="card-body p-2 align-items-start">
-               <img *ngIf="event.imageSrc" class="card-img-right flex-auto" [src]="event.imageSrc" />
-
+            <div class="card-body align-items-start flex-item-2">
+                <!--    EVENT INFO  -->
                 <h3 class="mb-0">
                     <a class="text-primary eventName" (click)="event.isDisplayComments = !event.isDisplayComments">
                         {{event.name}}
@@ -26,6 +29,13 @@
                 </div>
                 <p class="card-text mb-auto">{{event.description}}.</p>
 
+                <!--    EVENT FULL SIZE IMAGE   -->
+                <div *ngIf="event.isDisplayComments && !event.isNoImageAvailable" style="padding: 20px 0;">
+                    <img [src]="event.imageSrc" style="width: 100%"/>
+                    <small *ngIf="event.images && event.images.length >0 && event.images[0].caption" style="text-align: center">{{event.images[0].caption}}</small>
+                </div>
+
+                <!--    EVENT COMMENTS  -->
                 <strong class="d-inline-block mb-2 text-dark" *ngIf="event.isDisplayComments" style="margin-top:20px;">COMMENTS</strong>
                 <ul class="list-group mb-3 commentsContainer" *ngIf="event.isDisplayComments">
                     <li class="d-flex justify-content-between lh-condensed" *ngFor="let comment of event.comments">
@@ -35,6 +45,10 @@
                         </div>
                     </li>                
                 </ul>
+            </div>
+            <!--    EVENT THUMBNAIL IMAGE -->
+            <div class="flex-item-3" *ngIf="!event.isDisplayComments">
+                <img *ngIf="event.imageSrc" [src]="event.imageSrc" />
             </div>
         </div>
     </div>
