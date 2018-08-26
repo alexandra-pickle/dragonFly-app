@@ -3,7 +3,6 @@ import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular
 import { Event } from './events.models';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, retry, map } from 'rxjs/operators';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Injectable()
 export class EventsService {
@@ -11,7 +10,7 @@ export class EventsService {
     private userName = 'anything';
     private headers: HttpHeaders;
 
-    constructor(private http: HttpClient, private domSanitizer: DomSanitizer) {
+    constructor(private http: HttpClient) {
         this.headers = new HttpHeaders();
         this.headers = this.headers.append("Authorization", "Basic " + btoa("anything:evalpass"));
         this.headers = this.headers.append("Content-Type", "application/json");
@@ -33,26 +32,22 @@ export class EventsService {
     /**
      * Method returns an event image
      */
-    public getEventImage(eventID: string, mediaID: string): Observable<SafeUrl> {
+    public getEventImage(eventID: string, mediaID: string) {
         let headers = new HttpHeaders();
         headers = headers.append("Authorization", "Basic " + btoa("anything:evalpass"));
         headers = headers.append("Content-Type", "image/jpeg");
-
         return this.http.get(`${this.configUrl}events/${eventID}/media/${mediaID}`, { headers: headers, responseType: "blob" })
-            .pipe(
-                map(blob => { 
-                    let urlCreator = window.URL;
-                    let result = this.domSanitizer.bypassSecurityTrustUrl(urlCreator.createObjectURL(blob));
-                    return result;}),
-                retry(10),
-                catchError(this.handleError)
-            );
+        .pipe(
+            map(blob => URL.createObjectURL(blob)),
+            retry(10),
+            catchError(this.handleError)
+        );
     }
 
     /**
      * Method returns event status
      */
-    public getEventStatus(eventID: number):Observable<{coming: boolean}>{
+    public getEventStatus(eventID: string){
         return this.http.get
         (`${this.configUrl}events/${eventID}/status/${this.userName}`, { headers: this.headers })
         .pipe(

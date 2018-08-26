@@ -8,7 +8,8 @@ export interface Event {
     coments: Array<EventComment>,
     isGoing?: boolean,
     isDisplayComments?: boolean,
-    isDisplayingImage?: boolean
+    isImageLoading?: boolean,
+    imageSrc?: any
 }
 
 export interface EventImage {

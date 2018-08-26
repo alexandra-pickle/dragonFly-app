@@ -20,13 +20,17 @@
 }
 
 .eventCheckbox {
-    margin-top: 25px; 
-    margin-left: 20px;
+    margin-top: 8px;
+    margin-left: 30px;
 
     input {
         width: 20px; 
         height: 20px;
     }
+}
+
+.card {
+    margin-top: 20px;
 }
 
 .commentsContainer {
@@ -37,4 +41,8 @@
 
 .eventName, .eventName :hover {
     cursor: pointer;
+}
+
+button {
+    margin-top: 20px;
 }

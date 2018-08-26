@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { EventsService } from './events.service';
 import { Event } from './events.models';
-import { SafeUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-events',
@@ -13,11 +13,16 @@ export class EventsComponent implements OnInit {
     public events: Array<Event>;
     public imageSrc: string;
     public test: SafeUrl;
+    public startIndex: number;
+    public endIndex: number;
 
-    constructor(private eventsService: EventsService) { }
+    constructor(private eventsService: EventsService, private sanitizer: DomSanitizer) { }
 
     ngOnInit() {
         this.isLoading = true;
+        this.startIndex = 0;
+        this.endIndex = 10;
+
         this.events = new Array<Event>();
 
         //  get all the events
@@ -29,16 +34,18 @@ export class EventsComponent implements OnInit {
                     if (this.events && this.events.length > 0) {
 
                         //  get status for each event
-                        this.events.forEach(event => {
+                        this.events.forEach((event, eventIndex) => {
                             if (event) {
                                 event.isDisplayComments = false;
                                 event.isGoing = false;
                                 this.eventsService.getEventStatus(event.id).subscribe(statusResponse => {
                                     if (statusResponse && statusResponse !== undefined
-                                        && statusResponse.coming !== undefined) {
-                                        event.isGoing = statusResponse.coming;
+                                        && statusResponse['coming'] !== undefined) {
+                                        event.isGoing = statusResponse['coming'];
                                     } 
-                                }
+                                });
+
+                                this.getThumbnailImage(event);
                             }
                         });
                     }
@@ -52,14 +59,28 @@ export class EventsComponent implements OnInit {
     }
 
     public getThumbnailImage(event: Event) {
-        if (event && event.images && event.images.length > 0) {
-            this.eventsService.getEventImage(event.id, event.images[0].id)
-            .subscribe((imageResponse) => {
-                if (imageResponse) {
-                    this.events.find(x => x.id === event.id).isDisplayingImage = true;
-                    return imageResponse;
-                }
-            });
+        let eventIndex = this.events.indexOf(event);
+
+        if (!eventIndex || (eventIndex < this.startIndex) || (eventIndex > this.endIndex)) {
+            return;
         }
+        console.log(eventIndex);
+
+        if (event && event.images && event.images.length > 0 && this.events.indexOf(event) < 10) {
+            this.eventsService.getEventImage(event.id, event.images[0].id)
+                .subscribe(imageUrl => {
+                    let eventFound = this.events.find(x => x.id === event.id);
+                    eventFound.imageSrc = this.sanitizer.bypassSecurityTrustUrl(imageUrl);
+                });
+        }
+    }
+
+    public loadMoreEvents() {
+        this.endIndex += 10;
+    }
+
+    public changeEventStatus(eventID: number, isGoing: boolean) {
+        this.eventsService.updateEventStatus(eventID, isGoing).subscribe(response => {
+        });
     }
 }
